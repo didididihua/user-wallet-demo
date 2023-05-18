@@ -3,6 +3,7 @@ package cn.chong.service.impl;
 import cn.chong.constant.RedisKeyConstant;
 import cn.chong.mapper.UserWalletMapper;
 import cn.chong.model.dto.userWallet.UserConsumerRequest;
+import cn.chong.model.dto.userWalletDetail.UserWalletDetailRequest;
 import cn.chong.model.entity.UserEntity;
 import cn.chong.model.entity.UserWalletDetailEntity;
 import cn.chong.model.entity.UserWalletEntity;
@@ -14,6 +15,7 @@ import cn.chong.service.UserWalletService;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -86,7 +88,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
         BigDecimal afterAmount = calculatedAmount(userWalletEntity.getTotalAmount(), consumerRequest);
 
         UserWalletEntity afterUserWallet = new UserWalletEntity();
-        afterUserWallet.setUserId(userWalletEntity.getUserId());
+        afterUserWallet.setId(userWalletEntity.getId());
         afterUserWallet.setTotalAmount(afterAmount);
         baseMapper.updateById(afterUserWallet);
         log.info("修改用户：{}钱包总金额，即修改UserWalletEntity数据完成，修改后的金额为：{}",consumerRequest.getUserId(), afterAmount);

@@ -2,8 +2,11 @@ package cn.chong.service;
 
 
 import cn.chong.model.dto.userWallet.UserConsumerRequest;
+import cn.chong.model.dto.userWalletDetail.UserWalletDetailRequest;
+import cn.chong.model.entity.UserWalletDetailEntity;
 import cn.chong.model.entity.UserWalletEntity;
 import cn.chong.model.vo.UserWalletVo;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -27,5 +30,7 @@ public interface UserWalletService extends IService<UserWalletEntity> {
      * @param consumerRequest
      */
     void consumerAmount(UserConsumerRequest consumerRequest);
+
+
 }
 

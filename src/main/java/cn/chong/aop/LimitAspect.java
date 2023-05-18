@@ -16,12 +16,14 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -37,15 +39,12 @@ import java.util.Objects;
 @Component
 public class LimitAspect {
 
-    private final RedisTemplate<String, Serializable> limitRedisTemplate;
+    @Resource
+    private StringRedisTemplate limitRedisTemplate;
 
-    @Autowired
-    public LimitAspect(RedisTemplate<String, Serializable> limitRedisTemplate) {
-        this.limitRedisTemplate = limitRedisTemplate;
-    }
 
     //定义切点
-    @Pointcut("@annotation(annotation.Limit)")
+    @Pointcut("@annotation(cn.chong.annotation.Limit)")
     public void pointcut() {
         // do nothing
     }
@@ -67,12 +66,12 @@ public class LimitAspect {
         ImmutableList<String> keys = ImmutableList.of(RedisKeyConstant.LIMIT_IP_KEY + limitAnnotation.prefix() + ":" + ip);
 
         String luaScript = buildLuaScript();
-        RedisScript<Number> redisScript = new DefaultRedisScript<>(luaScript, Number.class);
-        Number count = limitRedisTemplate.execute(redisScript, keys, limitCount, limitPeriod);
+        RedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
+        Long count = limitRedisTemplate.execute(redisScript, keys, String.valueOf(limitCount), String.valueOf(limitPeriod));
 
         log.info("IP:{} 第 {} 次访问key为 {}，描述为 [{}] 的接口", ip, count, keys, name);
 
-        if (count != null && count.intValue() <= limitCount) {
+        if (count != null && count != 1) {
             //放行
             return point.proceed();
         } else {
@@ -90,13 +89,13 @@ public class LimitAspect {
         return "local c" +
                 "\nc = redis.call('get',KEYS[1])" +
                 "\nif c and tonumber(c) > tonumber(ARGV[1]) then" +
-                "\nreturn c;" +
+                "\nreturn 1;" +
                 "\nend" +
                 "\nc = redis.call('incr',KEYS[1])" +
                 "\nif tonumber(c) == 1 then" +
                 "\nredis.call('expire',KEYS[1],ARGV[2])" +
                 "\nend" +
-                "\nreturn c;";
+                "\nreturn 0;";
     }
 
 }

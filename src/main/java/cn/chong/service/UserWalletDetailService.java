@@ -1,7 +1,10 @@
 package cn.chong.service;
 
 
+import cn.chong.model.dto.userWalletDetail.UserWalletDetailRequest;
 import cn.chong.model.entity.UserWalletDetailEntity;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -13,5 +16,19 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserWalletDetailService extends IService<UserWalletDetailEntity> {
 
+    /**
+     * 分页查询用户钱包明细数据
+     * @param request
+     * @return
+     */
+    Page<UserWalletDetailEntity> getUserWalletDetailList(UserWalletDetailRequest request);
+
+    /**
+     * 获取查询条件
+     *
+     * @param request
+     * @return
+     */
+    QueryWrapper<UserWalletDetailEntity> getQueryWrapper(UserWalletDetailRequest request);
 }
 

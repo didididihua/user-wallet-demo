@@ -7,10 +7,13 @@ import cn.chong.common.ResultUtils;
 import cn.chong.constant.RedisKeyConstant;
 import cn.chong.exception.BusinessException;
 import cn.chong.model.dto.userWallet.UserConsumerRequest;
+import cn.chong.model.dto.userWalletDetail.UserWalletDetailRequest;
+import cn.chong.model.entity.UserWalletDetailEntity;
 import cn.chong.model.vo.UserWalletVo;
+import cn.chong.service.UserWalletDetailService;
 import cn.chong.service.UserWalletService;
-import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -37,21 +40,23 @@ public class UserWalletController {
     private UserWalletService userWalletService;
 
     @Resource
+    private UserWalletDetailService userWalletDetailService;
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 1. 查询用户钱包余额
-     * @param UserId 用户id
+     * @param userId 用户id
      * @return 用户钱包vo
      */
-    @GetMapping("/getUserWallet/userId")
-    public BaseResponse<UserWalletVo> getUserWallet(@PathVariable Long UserId){
+    @GetMapping("/getUserWallet/{userId}")
+    public BaseResponse<UserWalletVo> getUserWallet(@PathVariable Long userId){
         //校验用户id是否为空
-        if(ObjUtil.isEmpty(UserId)){
+        if(ObjUtil.isEmpty(userId)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户id为空");
         }
         //根据用户id查询他的钱包
-        UserWalletVo userWalletVo = userWalletService.getUserWalletVo(UserId);
+        UserWalletVo userWalletVo = userWalletService.getUserWalletVo(userId);
 
         return ResultUtils.success(userWalletVo);
     }
@@ -86,6 +91,29 @@ public class UserWalletController {
 
         return ResultUtils.success("操作成功");
     }
+
+
+    /**
+     * 4. 查询用户钱包金额变动明细的接口
+     * @return
+     */
+    @PostMapping("getUserWalletDetailList")
+    public BaseResponse<Page<UserWalletDetailEntity>> getUserWalletDetailList(@RequestBody UserWalletDetailRequest request){
+
+        //分页查询需要的字段为空时直接返回,简单限制一下爬虫
+        Long current = request.getCurrent();
+        Long pageSize = request.getPageSize();
+        if(ObjUtil.hasEmpty(current, pageSize) || pageSize > 20){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
+        }
+
+        //开始查询
+        Page<UserWalletDetailEntity> page = userWalletDetailService.getUserWalletDetailList(request);
+
+        return ResultUtils.success(page);
+    }
+
+
 
 
     /**
