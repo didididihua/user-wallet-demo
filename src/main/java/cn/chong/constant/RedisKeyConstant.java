@@ -1,5 +1,7 @@
 package cn.chong.constant;
 
+import cn.chong.annotation.Limit;
+
 /**
  * @author: tangchongjie
  * @creattime: 2023--05--05 17:01
@@ -7,15 +9,6 @@ package cn.chong.constant;
  */
 public interface RedisKeyConstant {
 
-    /**
-     * 缓存在redis中的树状label数据的key
-     */
-    String LABEL_DATA_KEY = "label:data:all";
-
-    /**
-     * 以label的labelName为key和label的id为value的map
-     */
-    String LABEL_MAP_KEY = "label:data:map";
 
     /**
      * 重建label缓存时，防止缓存击穿问题使用的分布式锁
@@ -28,8 +21,23 @@ public interface RedisKeyConstant {
     Long EXPIRE_TIME = 30l;
 
     /**
+     * 对消费接口（用户钱包数据进行更改的接口）进行幂等校验的key
+     */
+    String MDN_CONSUMER_KEY = "mdn:consumer:key";
+
+    /**
+     * 对消费接口（用户钱包数据进行更改的接口）进行幂等校验的key的过期时间，也是同样请求再次请是的限制时间间隔
+     */
+    Long MDN_EXPIRE_TIME = 5 * 1000l;
+
+    /**
      * 在进行跟新redis中的数据时，延迟双删的第二次删除前延迟的时间，毫秒
      */
     Long UPDATE_SLEEP_TIME = 3 * 6 * 1000l;
+
+    /**
+     * redis限流的key
+     */
+    String LIMIT_IP_KEY = "limit:";
 
 }

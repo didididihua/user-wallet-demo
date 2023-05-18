@@ -1,18 +1,23 @@
 package cn.chong.controller;
 
+import cn.chong.annotation.Limit;
 import cn.chong.common.BaseResponse;
 import cn.chong.common.ErrorCode;
 import cn.chong.common.ResultUtils;
+import cn.chong.constant.RedisKeyConstant;
 import cn.chong.exception.BusinessException;
 import cn.chong.model.dto.userWallet.UserConsumerRequest;
 import cn.chong.model.vo.UserWalletVo;
 import cn.chong.service.UserWalletService;
+import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ObjUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: tangchongjie
@@ -30,6 +35,9 @@ public class UserWalletController {
 
     @Resource
     private UserWalletService userWalletService;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 1. 查询用户钱包余额
@@ -57,14 +65,18 @@ public class UserWalletController {
      * @param consumerRequest 用户钱包数据更改的请求参数
      * @return String
      */
-    @PostMapping("/consumer")
+    @PostMapping("/updateWallet")
+    @Limit(period = 60, count = 20, name = "更改用户钱包数据", prefix = "updateWallet")
     public BaseResponse<String> consumerAmount(@RequestBody UserConsumerRequest consumerRequest){
 
         if(!validConsumerRequest(consumerRequest)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         };
 
-        //开始消费
+        //幂等判断，判断是否为重复请求，不是重复请求才能进行处理
+        MDNWithRedis(consumerRequest);
+
+        //开始数据处理
         try{
             userWalletService.consumerAmount(consumerRequest);
         }catch (Exception e) {
@@ -73,6 +85,30 @@ public class UserWalletController {
         }
 
         return ResultUtils.success("操作成功");
+    }
+
+
+    /**
+     * 使用传入的consumerRequest对象属性进行Hash来,UserConsumerRequest使用了@Data注解，重写了获取Hash值的方法
+     * @param consumerRequest
+     */
+    private void MDNWithRedis(UserConsumerRequest consumerRequest) {
+        //计算Hash值
+        int hashCode = consumerRequest.hashCode();
+        String valueOf = String.valueOf(hashCode);
+        log.info("判断幂等开始，请求对象的hash值为:{}", valueOf);
+
+        //使用redis的setnx原子操作进行幂等判断
+        Boolean ifAbsent = stringRedisTemplate.opsForValue().setIfAbsent(RedisKeyConstant.MDN_CONSUMER_KEY, valueOf,
+                RedisKeyConstant.MDN_EXPIRE_TIME, TimeUnit.MICROSECONDS);
+
+        //setnx失败，表示该请求是重复请求，返回提示
+        if(!ifAbsent){
+            log.info("此次更改用户钱包的请求为重复请求，需要等待重试，予以拦截");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "重复请求，请等下再试");
+        }
+
+        log.info("此次更改用户钱包的请求不为重复请求，予以放行，幂等判断结束");
     }
 
     /**
