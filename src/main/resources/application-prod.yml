@@ -3,17 +3,17 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://106.52.147.158:3306/disou_db?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://xxx.xxx.xxx.xxx:3306/disou_db?useUnicode=true&characterEncoding=utf8
     username: self
-    password: 20010628tch..
+    password: xxxxxxx
   # Redis 配置
   # todo 需替换配置
   redis:
     database: 1
-    host: 43.143.192.202
-    port: 6388
+    host: xx.xx.xx.xx
+    port: 6379
     timeout: 5000
-    password: 123456
+    password: 1234
   # Elasticsearch 配置
   # todo 需替换配置
 #  elasticsearch:

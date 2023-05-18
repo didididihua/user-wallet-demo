@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 
@@ -89,6 +90,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
 
         UserWalletEntity afterUserWallet = new UserWalletEntity();
         afterUserWallet.setId(userWalletEntity.getId());
+        afterUserWallet.setUpdateTime(new Date());
         afterUserWallet.setTotalAmount(afterAmount);
         baseMapper.updateById(afterUserWallet);
         log.info("修改用户：{}钱包总金额，即修改UserWalletEntity数据完成，修改后的金额为：{}",consumerRequest.getUserId(), afterAmount);
