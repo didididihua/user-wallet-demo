@@ -4,6 +4,10 @@ spring:
   # 默认 dev 环境
   profiles:
     active: dev
+  #时间转换
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
   # 支持 swagger3
   mvc:
     pathmatch:
@@ -18,13 +22,13 @@ spring:
   # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/diso_db
+    url: jdbc:mysql://localhost:3306/my_project
     username: root
     password: 123456
   # Redis 配置
   # todo 需替换配置，然后取消注释
   redis:
-    database: 1
+    database: 2
     host: 43.143.192.202
     port: 6388
     timeout: 5000
@@ -40,6 +44,7 @@ spring:
     multipart:
       # 大小限制
       max-file-size: 10MB
+  # 时间转换
 server:
   address: 0.0.0.0
   port: 8101
@@ -51,7 +56,6 @@ server:
         max-age: 2592000
 mybatis-plus:
   configuration:
-    map-underscore-to-camel-case: false
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:

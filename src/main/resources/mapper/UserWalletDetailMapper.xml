@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.chong.mapper.UserWalletDetailMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.chong.model.entity.UserWalletDetailEntity" id="userWalletDetailMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="updateAmount" column="update_amount"/>
+        <result property="updateType" column="update_type"/>
+        <result property="updateSource" column="update_source"/>
+        <result property="beforeAmount" column="before_amount"/>
+        <result property="afterAmount" column="after_amount"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+
+</mapper>
